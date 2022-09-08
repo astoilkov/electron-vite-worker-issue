@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import renderer from './plugins'
 import pkg from '../../package.json'
+import resolve from 'vite-plugin-resolve'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,6 +9,10 @@ export default defineConfig({
   mode: process.env.NODE_ENV,
   base: './',
   plugins: [
+    // 🚧 Avoid export `ipcRenderer`
+    resolve({
+      electron: `export default require('electron');`,
+    }).map(plugin => Object.assign(plugin, { enforce: 'pre' })),
     // Support use Node.js API in Electron-Renderer
     // @see - https://github.com/electron-vite/vite-plugin-electron-renderer
     renderer(),
