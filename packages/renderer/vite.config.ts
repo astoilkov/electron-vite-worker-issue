@@ -1,29 +1,34 @@
-import { defineConfig } from 'vite'
-import renderer from './plugins'
-import pkg from '../../package.json'
-import resolve from 'vite-plugin-resolve'
+import { defineConfig } from "vite";
+import pkg from "../../package.json";
+import { builtinModules } from "module";
+import renderer from "vite-plugin-electron-renderer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   root: __dirname,
-  mode: process.env.NODE_ENV,
-  base: './',
+  // mode: process.env.NODE_ENV,
+  base: "./",
   plugins: [
-    // 🚧 Avoid export `ipcRenderer`
-    resolve({
-      electron: `export default require('electron');`,
-    }).map(plugin => Object.assign(plugin, { enforce: 'pre' })),
-    // Support use Node.js API in Electron-Renderer
-    // @see - https://github.com/electron-vite/vite-plugin-electron-renderer
-    renderer(),
+    renderer({
+      resolve() {
+        return ["graceful-fs"];
+      },
+    }),
   ],
   build: {
-    outDir: '../../dist/renderer',
+    outDir: "../../dist/renderer",
     emptyOutDir: true,
     sourcemap: true,
   },
-  server: process.env.VSCODE_DEBUG ? {
-    host: pkg.debug.env.VITE_DEV_SERVER_HOSTNAME,
-    port: pkg.debug.env.VITE_DEV_SERVER_PORT,
-  } : undefined,
-})
+  worker: {
+    rollupOptions: {
+      external: ["electron", ...builtinModules],
+    },
+  },
+  server: process.env.VSCODE_DEBUG
+    ? {
+        host: pkg.debug.env.VITE_DEV_SERVER_HOSTNAME,
+        port: pkg.debug.env.VITE_DEV_SERVER_PORT,
+      }
+    : undefined,
+});

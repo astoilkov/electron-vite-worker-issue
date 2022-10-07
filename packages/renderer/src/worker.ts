@@ -1,3 +1,8 @@
-import { join } from 'path'
+import { join } from "path";
+import { readFileSync } from "graceful-fs";
 
-console.log(join('a', 'b'))
+try {
+  readFileSync("/dummy.txt", "utf-8");
+} catch {}
+
+console.log(join("a", "b"));
